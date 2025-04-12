@@ -52,9 +52,5 @@ https://github.com/ultralytics/yolov5
 https://github.com/soloIife/yolov5_for_rknn
 
 
-## 技术交流群：
-
-QQ群：810456486
-
 
 

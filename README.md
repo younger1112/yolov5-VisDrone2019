@@ -1,6 +1,6 @@
 ## 仓库说明：
 
-本仓库是针对基于EASY-EAI-Nano(RV1126)从PC端模型训练、模型单步测试、pytorch模型转换为onnx模型的流程说明，并以口罩检测为例子说明。而模型如何部署到硬件主板上，完整的在线文档教程可以查看以下在线文档的链接：
+本仓库是yolov5实现行人车辆检测。
 
 ## 环境说明：
 
@@ -11,46 +11,37 @@ pytorch version >= 1.7
 onnx verison >= 1.11
 
 ## 准备数据
-口罩检测数据百度链接：https://pan.baidu.com/s/1vtxWurn1Mqu-wJ017eaQrw 提取码：6666 
+VisDrone2019数据集：通过网盘分享的文件：visdrone2019.zip
+链接: https://pan.baidu.com/s/1lMtNKyDI8pFi9q4kG6yeCA?pwd=1112 提取码: 1112 
 
-数据集解压后(脚本在数据集里面)，执行以下脚本生成train.txt和valid.txt：
-```python
-python list_dataset_file.py
-```
+数据集解压后放在datasets文件夹下。
+更改修改配置文件VisDrone.yaml文件：
+打开yolov5/yolov5-master/data文件夹下的VisDrone.yaml文件，将其中path参数修改为VisDrone2019文件夹所在的路径。
+修改yolov5m.yaml文件（若训练其他yolo网络修改相应的yaml文件即可），打开yolov5/yolov5-master/models文件夹下的yolov5m.yaml文件，将其中nc参数修改为VisDrone2019数据集训练的类别，即nc：10。
 
 
 ## 训练模型
-训练一个口罩检测模型，需要修改"data/mask.yaml"里面的train.txt和valid.txt的路径。训练脚本如下所示：
+修改train.py文件：在yolov5/yolov5-master下的train.py文件，需要修改几个default参数
+我主要更改了–weights、–cfg、–data、–epoch以及–batch-size的默认参数
+训练脚本如下所示：
 ```python
-python train.py --data mask.yaml --cfg yolov5s.yaml --weights "" --batch-size 64
-                                       yolov5m                                40
+python train.py --data mask.yaml --cfg yolov5m.yaml --weights "" --batch-size 64
+                                       yolov5s                               64
                                        yolov5l                                24
                                        yolov5x                                16
 ```
-训练完成后会在
+训练完成后，过程文件及训练模型，会保存在runs/文件夹中。
 
 ## 模型预测
-测试训练好的模型：
+测试训练好的模型：修改detect.py中的–weights参数，运行detect.py文件，即可看到检测效果。
+主要修改detect.py中的配置文件如下：
+ parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'weights/yolov5m.pt', help='model path(s)')
+
 ```python
 python detect.py --source data/images --weights ./runs/train/exp/weights/best.pt --conf 0.5
 ```
 测试结果会在"runs/detect"生成：
 <img src="./photo/image.jpg">
-
-
-## 模型导出
-执行以下指令把pt模型转换为onnx模型，同时会生成best.anchors.txt：
-```python
-python export.py --include onnx --rknpu RV1126 --weights ./runs/train/exp/weights/best.pt
-```
-
-
-### EASY-EAI-Nano基于NPU运行速度测试(单位:ms)：
-
-| 模型(640x640输入)         | EASY-EAI-Nano(RV1126)  |
-| :---------------------- | :-----------------------------------------:  |
-| yolov5s int8量化 |   52    |
-| yolov5m int8量化 |   93    |
 
 
 
